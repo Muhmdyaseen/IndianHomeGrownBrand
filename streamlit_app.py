@@ -1,39 +1,34 @@
 # streamlit_app.py
 
 import streamlit as st
+import pandas as pd
+
+url = 'https://docs.google.com/spreadsheets/d/16qDWOLojEEMYQlKG33e0E0gxBPLc50BVlexxBFn9vPc/export?format=csv'
+brands = pd.read_csv(url, on_bad_lines='warn')
 
 # Page title
 st.title("Indian Apparel Brand Portfolio")
 st.markdown("Discover and explore homegrown Indian fashion brands.")
 
-# Sample list of brands
-brands = [
-    {
-        "name": "Fabindia",
-        "description": "Handcrafted ethnic apparel from across India.",
-        "website": "https://www.fabindia.com",
-        "image": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0a/Fabindia_logo.svg/1280px-Fabindia_logo.svg.png"
-    },
-    {
-        "name": "Raw Mango",
-        "description": "Handwoven saris and contemporary textiles.",
-        "website": "https://www.rawmango.com",
-        "image": "https://www.rawmango.com/logo.png"
-    },
-    {
-        "name": "Suta",
-        "description": "Comfortable and conscious clothing.",
-        "website": "https://suta.in",
-        "image": "https://suta.in/cdn/shop/files/Suta-Logo.png"
-    },
-    # Add more brands...
-]
+# Layout with columns to align search bar right
+col1, col2, col3 = st.columns([5, 1, 3])
+with col3:
+    search_query = st.text_input("Search", placeholder="Type a brand name", label_visibility="collapsed")
 
-# Show brand cards
-for brand in brands:
-    with st.container():
-        st.image(brand["image"], width=1500)
-        st.subheader(brand["name"])
-        st.write(brand["description"])
-        st.markdown(f"[Visit Website]({brand['website']})")
-        st.markdown("---")
+search_query = search_query.strip().lower()
+if search_query:
+    filtered_brands = brands[brands['name'].str.lower().str.contains(search_query, na=False)]
+else:
+    filtered_brands = brands
+
+# Show results
+if not filtered_brands.empty:
+    for _, brand in filtered_brands.iterrows():
+        with st.container():
+            # st.image(brand["image"], width=150)  # uncomment if image URL is valid
+            st.subheader(brand["name"])
+            st.write(brand["description"])
+            st.markdown(f"[Visit Website]({brand['website']})")
+            st.markdown("---")
+else:
+    st.warning("No brands match your search.")
